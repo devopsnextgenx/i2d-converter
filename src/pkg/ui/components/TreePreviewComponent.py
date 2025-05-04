@@ -4,8 +4,8 @@ from tkinter import ttk
 from typing import Literal
 from PIL import Image, ImageTk
 
-from .HistoryManager import HistoryManager
-from .ImageNode import ImageNode, ProcessingDetails
+from ...core.history.HistoryManager import HistoryManager
+from ...core.history.ImageNode import ImageNode, ProcessingDetails
 
 import ttkbootstrap as tb
 import tkinter as tk
@@ -15,7 +15,6 @@ import os
 
 # Position type for component layout
 Position = Literal["LEFT", "RIGHT", "TOP", "BOTTOM"]
-
 
 class ImagePreview(tb.Frame):
     """Base class for displaying images"""

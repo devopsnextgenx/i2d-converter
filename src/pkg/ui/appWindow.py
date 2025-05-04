@@ -4,7 +4,7 @@ from devopsnextgenx.components.StatusBar import StatusBar
 from pkg.ui.menu.menuFrame import MenuFrame
 from pkg.core.history.HistoryManager import HistoryManager
 from pkg.core.imageProcessUtils import ImageProcessor
-from pkg.core.history.TreePreviewComponent import TreePreviewComponent
+from pkg.ui.components.TreePreviewComponent import TreePreviewComponent
 from ttkbootstrap.constants import BOTH
 
 class AppWindow(ttk.Window):
