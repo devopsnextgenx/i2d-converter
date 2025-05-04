@@ -3,6 +3,8 @@ from datetime import datetime
 from tkinter import ttk
 from typing import Literal
 from PIL import Image, ImageTk
+from tkinter import messagebox
+from ...utils.fileHelper import saveImage
 
 from ...core.history.HistoryManager import HistoryManager
 from ...core.history.ImageNode import ImageNode, ProcessingDetails
@@ -288,40 +290,42 @@ class PreviewComponent(tb.Frame):
         self.main_paned = ttk.PanedWindow(self.preview_container, orient=tk.VERTICAL)
         self.main_paned.pack(fill=BOTH, expand=True)
         
+        # Get container dimensions with minimum defaults
+        container_width = max(self.preview_container.winfo_width(), 600)
+        container_height = max(self.preview_container.winfo_height(), 600)
+        
+        # Calculate equal frame sizes - use 48% of container size but maintain minimum size
+        frame_width = max(int(container_width * 0.48), 300)
+        frame_height = max(int(container_height * 0.48), 300)
+        
         # Create horizontal/vertical paned window for input/output previews
         style = ttk.Style()
         style.configure('Preview.TPanedwindow', sashwidth=4, sashrelief='raised')
         
         # Set orientation based on position
         orient = tk.HORIZONTAL if self.position_var.get() in ["LEFT", "RIGHT"] else tk.VERTICAL
-        self.preview_paned = ttk.PanedWindow(self.main_paned, orient=orient, style='Preview.TPanedwindow')
+        self.preview_paned = ttk.PanedWindow(self.main_paned, orient=orient, style='Preview.TPanedwindow', height=int(container_height*0.90))
         
-        # Get container dimensions
-        container_width = self.preview_container.winfo_width()
-        container_height = self.preview_container.winfo_height()
-        
-        # Use 48% of container size for each preview frame
-        frame_width = max(int(container_width * 0.48), 300)
-        frame_height = max(int(container_height * 0.48), 300)
-        
-        # Create frames with minimum sizes
+        # Create frames with fixed minimum sizes
         input_frame = tb.Frame(self.preview_paned, width=frame_width, height=frame_height)
         output_frame = tb.Frame(self.preview_paned, width=frame_width, height=frame_height)
         
-        # Prevent frames from shrinking below minimum size
+        # Force frames to maintain their size
         input_frame.pack_propagate(False)
         output_frame.pack_propagate(False)
+        input_frame.grid_propagate(False)
+        output_frame.grid_propagate(False)
         
         # Create new preview components inside the fixed-size frames
         self.input_preview = InputPreview(input_frame, bootstyle=INFO)
-        self.input_preview.pack(fill=BOTH, expand=True)
+        self.input_preview.pack(fill=BOTH, expand=True, padx=5, pady=5)
         
         self.output_preview = OutputPreview(output_frame, bootstyle=INFO)
-        self.output_preview.pack(fill=BOTH, expand=True)
+        self.output_preview.pack(fill=BOTH, expand=True, padx=5, pady=5)
         
-        # Add frames to preview paned window
-        self.preview_paned.add(input_frame)
-        self.preview_paned.add(output_frame)
+        # Add frames to preview paned window with equal weights
+        self.preview_paned.add(input_frame, weight=1)
+        self.preview_paned.add(output_frame, weight=1)
         
         # Create process details preview
         if hasattr(self, 'process_detail_preview'):
@@ -425,6 +429,44 @@ class TreeComponent(tb.Frame):
         self.tree.bind("<<TreeviewSelect>>", self.on_item_selected)
         self.selection_callback = None
         
+        # Create popup menu
+        self.popup_menu = tk.Menu(self, tearoff=0)
+        self.popup_menu.add_command(label="Save Output", command=self.save_selected_node)
+        
+        # Bind right click to show popup menu
+        self.tree.bind("<Button-3>", self.show_popup_menu)
+        
+    def show_popup_menu(self, event):
+        """Show popup menu on right click"""
+        # Get item under cursor
+        item = self.tree.identify_row(event.y)
+        if item:
+            # Select the item
+            self.tree.selection_set(item)
+            # Show popup menu
+            self.popup_menu.post(event.x_root, event.y_root)
+            
+    def save_selected_node(self):
+        """Save the output of selected node"""
+        selected_items = self.tree.selection()
+        if not selected_items:
+            return
+            
+        item_id = selected_items[0]
+        if item_id in self.nodes:
+            node = self.nodes[item_id]
+            if node.output is not None:
+                try:
+                    # Create filename based on operation name
+                    filename = f"{node.operation_details.operation_name}.jpg"
+                    # Save the image using FileHelper
+                    saveImage(node.output, filename)
+                    messagebox.showinfo("Success", f"Image saved as {filename}")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to save image: {str(e)}")
+            else:
+                messagebox.showwarning("Warning", "No output image available to save")
+                
     def set_selection_callback(self, callback):
         """Set callback function for tree selection"""
         self.selection_callback = callback

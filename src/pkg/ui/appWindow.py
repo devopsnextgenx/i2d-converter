@@ -1,4 +1,5 @@
 import ttkbootstrap as ttk
+import sys
 
 from devopsnextgenx.components.StatusBar import StatusBar
 from pkg.ui.menu.menuFrame import MenuFrame
@@ -11,10 +12,15 @@ class AppWindow(ttk.Window):
     def __init__(self):
         super().__init__(themename="darkly")
 
-        self.inputFile = None
-
         self.title("Component Demo")
-        self.geometry("600x400")
+        
+        # Start maximized - platform specific
+        if sys.platform == "win32":
+            self.state('zoomed')
+        else:  # Linux and macOS
+            self.attributes('-zoomed', True)
+        
+        self.inputFile = None
 
         # Add status bar at the bottom
         self.status_bar = StatusBar(self, progress_thickness=5)

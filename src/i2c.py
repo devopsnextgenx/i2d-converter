@@ -10,5 +10,6 @@ if __name__ == "__main__":
     print(f"{args.theme = }")
     print(f"{args.dpx = }")
     app = AppWindow()
+    app.state('normal')
     app.mainloop()
     

@@ -105,3 +105,4 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 logs/
+output/
