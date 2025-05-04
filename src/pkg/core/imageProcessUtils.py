@@ -3,10 +3,21 @@ from .history.HistoryManager import HistoryManager
 import cv2
 
 class ImageProcessor(metaclass=Singleton):
-    def __init__(self):
+    def __init__(self, status_bar=None):
         # Initialize any required attributes
         self.history_manager = HistoryManager()
+        self.status_bar = status_bar
         pass
+
+    def update_status(self, message):
+        """
+        Update status bar with a message
+        
+        Args:
+            message: Message to display in the status bar
+        """
+        if self.status_bar:
+            self.status_bar.update_status(message)
 
     def load_image(self, file_path):
         """
@@ -22,6 +33,7 @@ class ImageProcessor(metaclass=Singleton):
         """
         # Read image using OpenCV
         self.history_manager.start_new_chain(file_path)
+        self.update_status(f"Loaded image: {file_path}")
         return self.history_manager.current_node.output
 
     def convertBGR2RGB(self, image = None):
@@ -44,10 +56,10 @@ class ImageProcessor(metaclass=Singleton):
             operation="RGB",
             parameters=None
         )
-
+        self.update_status(f"Converted image to RGB format")
         return image
 
-    def apply_grayscale(self, image = None):
+    def convertToGray(self, image = None):
         """
         Apply grayscale transformation to image
         

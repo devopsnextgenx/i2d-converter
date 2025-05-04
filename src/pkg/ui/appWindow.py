@@ -35,8 +35,8 @@ class AppWindow(ttk.Window):
         self.menuFrame = MenuFrame(self.mainWindow, width=120,
                                     callbacks = {
                                        "on_file_open": self.load_image,
-                                       "on_gray_scale": self.apply_grayscale,
-                                       "on_rgb": self.apply_rgb
+                                       "on_gray_scale": self.convertToGray,
+                                       "on_rgb": self.convertBGR2RGB
                                     })
         self.menuFrame.pack_propagate(False)  # Prevent frame from shrinking
         self.menuFrame.pack(side="left", fill="y")
@@ -55,7 +55,7 @@ class AppWindow(ttk.Window):
         self.separator.pack(side="left", fill="y", padx=2)
 
         # Get singleton instances instead of creating new ones
-        self.image_processor = ImageProcessor()
+        self.image_processor = ImageProcessor(status_bar=self.status_bar)
         
         # Move treePreview into content_frame and ensure it fills properly
         self.treePreview = TreePreviewComponent(parent=self.content_frame, default_position="LEFT")
@@ -90,16 +90,16 @@ class AppWindow(ttk.Window):
         self.image_processor.load_image(file_path)
         self.treePreview.populate_tree(self.image_processor.history_manager.root_node)
 
-    def apply_rgb(self):
+    def convertBGR2RGB(self):
         if not self.inputFile:
             return
         
         self.image_processor.convertBGR2RGB()
         self.treePreview.populate_tree(self.image_processor.history_manager.root_node)
 
-    def apply_grayscale(self):
+    def convertToGray(self):
         if not self.inputFile:
             return
         
-        self.image_processor.apply_grayscale()
+        self.image_processor.convertToGray()
         self.treePreview.populate_tree(self.image_processor.history_manager.root_node)
