@@ -56,7 +56,7 @@ class ImageProcessor(metaclass=Singleton):
             operation="RGB",
             parameters=None
         )
-        self.update_status(f"Converted image to RGB format")
+        self.update_status(f"Converted image to RGB")
         return image
 
     def convertToGray(self, image = None):
@@ -79,4 +79,5 @@ class ImageProcessor(metaclass=Singleton):
             operation="Grayscale"
         )
 
+        self.update_status(f"Converted image to Gray")
         return image
